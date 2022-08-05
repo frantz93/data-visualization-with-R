@@ -68,10 +68,20 @@ west <- c('Northern Europe', 'Northern America', 'Australia and New Zealand', 'W
 p3 <- g %>% filter(year==past_year & !is.na(dpd)) %>% mutate(group = if_else(region %in% west, 'West', 'Developping')) %>%
   ggplot(aes(dpd, fill=group))
 p3 + geom_histogram(binwidth = 1, col = 'black')  #here we plot the 2 distributions histogram
-p3 + geom_histogram(binwidth = 1, col = 'black') + scale_x_continuous(trans = 'log2') #plotting with scale x log 2 transformation
+p3 + geom_histogram(binwidth = 1, col = 'black') + scale_x_continuous(trans = 'log2')  #plotting with scale x log 2 transformation
 p3 + geom_histogram(binwidth = 1, col = 'black') + scale_x_continuous(trans = 'log2') + facet_grid(.~group)  #faceting two plots for with respect to each distribution
     #faceting by west/developing and year
 present_year <- 2010
 p4 <- g %>% filter(year %in% c(past_year, present_year) & !is.na(dpd)) %>% mutate(group = if_else(region %in% west, 'West', 'Developping')) %>%
   ggplot(aes(dpd, fill=group))
 p4 + geom_histogram(binwidth = 1, col = 'black') + scale_x_continuous(trans = 'log2') + facet_grid(year~group)
+    #comparing the years using boxplot
+p5 <- g %>% filter(year %in% c(past_year, present_year) & !is.na(dpd)) %>% mutate(region = reorder(region, dpd, FUN=median)) %>%
+  ggplot(aes(region, dpd)) + theme(axis.text.x = element_text(angle=90, hjust = 1)) +
+  scale_y_continuous(trans = 'log2') + xlab("")
+
+p5 + geom_boxplot(aes(fill=continent)) + facet_grid(year~.) + scale_fill_discrete(name='Continent')  #by faceting graphs
+p5 + geom_boxplot(aes(fill=factor(year))) + scale_fill_discrete(name='Year') #on same graph
+
+#Density Plots
+
