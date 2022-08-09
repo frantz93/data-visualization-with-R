@@ -79,7 +79,7 @@ p4 + geom_histogram(binwidth = 1, col = 'black') + scale_x_continuous(trans = 'l
 p5 <- g %>% filter(year %in% c(past_year, present_year) & !is.na(dpd)) %>% mutate(region = reorder(region, dpd, FUN=median)) %>%
   ggplot(aes(region, dpd)) + theme(axis.text.x = element_text(angle=90, hjust = 1)) +
   scale_y_continuous(trans = 'log2') + xlab("")
-p5 + geom_boxplot(aes(fill=continent)) + facet_grid(year~.) + scale_fill_discrete(name='Continent')  #by faceting graphs
+  p5 + geom_boxplot(aes(fill=continent)) + facet_grid(year~.) + scale_fill_discrete(name='Continent')  #by faceting graphs
 p5 + geom_boxplot(aes(fill=factor(year))) + scale_fill_discrete(name='Year') #on same graph
 
 
