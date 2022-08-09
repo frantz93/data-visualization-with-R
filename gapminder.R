@@ -33,7 +33,7 @@ labels <- data.frame(country = countries, x = c(1975, 1965), y = c(60, 72))
 g %>% filter(country %in% countries) %>% ggplot(aes(year, life_expectancy, color=country)) + geom_line() + 
   geom_text(data = labels, aes(x, y, label=country)) + theme(legend.position = 'none')
 
-#Log Transformation
+#Variable Log Transformation
 g <- g %>% mutate(dpd = gdp/population/365)
 g <- g %>% mutate(log2_dpd = log2(dpd))
 head(g)
@@ -52,7 +52,7 @@ length(levels(g$region)) #number of regions
 past_year <- 1970
 p <- g %>% filter(year == past_year & !is.na(dpd)) %>% ggplot(aes(region, dpd, fill=continent))
 p + geom_boxplot() #raw plot
-p + geom_boxplot() + theme(axis.text.x = element_text(angle=90, hjust=1)) #plot with ajusted names on the x axis
+p + geom_boxplot() + theme(axis.text.x = element_text(angle=90, hjust=1)) #plot with adjusted names on the x axis
     #reordering regions by median dpd for easier interpretation
 p1 <- g %>% filter(year == past_year & !is.na(dpd)) %>% mutate(region = reorder(region, dpd, FUN=median)) %>%
   ggplot(aes(region, dpd, fill=continent)) + geom_boxplot() + theme(axis.text.x = element_text(size = 11, angle = 90, hjust = 1)) + 
@@ -156,3 +156,69 @@ surv_income %>% ggplot(aes(income, infant_survival_rate, label = group, color = 
                      breaks = c(.85, .90, .95, .99, .995, .998)) +
   geom_label(size = 3, show.legend = FALSE) 
 
+surv_income %>% ggplot(aes(income, infant_survival_rate, label = group, color = group)) +
+  scale_x_continuous(trans = "log2") +
+  scale_y_continuous(
+                     breaks = c(.85, .90, .95, .99, .995, .998)) +
+  geom_label(size = 3, show.legend = FALSE) 
+
+surv_income %>% mutate(logit_p = log(infant_survival_rate/(1 - infant_survival_rate))) %>% arrange(logit_p)
+str(surv_income)
+  
+
+#-------------------ASSESSMENT---------------------------
+#Create a scatter plot of  life expectancy versus fertility for the African continent in 2012
+head(g)
+summary(g$continent); summary(g$life_expectancy); summary(as.factor(g$year))
+
+g %>% filter(continent=='Africa' & year==2012) %>% ggplot(aes(fertility, life_expectancy)) + 
+  geom_point()
+
+g %>% filter(continent=='Africa' & year==2012) %>% ggplot(aes(fertility, life_expectancy, color=region)) + 
+  geom_point()
+
+df = g %>% filter(continent=='Africa' & year==2012 & fertility <= 3 & life_expectancy >= 70) %>% select(country, region)
+df
+
+tab = g %>% filter(country %in% c('Vietnam', 'United States') & year >= 1960 & year <= 2010)
+tab
+str(tab)
+
+p <- tab %>% ggplot(aes(year, life_expectancy, color=country)) + geom_line()
+p
+
+g %>% filter(country == 'Cambodia' & year >= 1960 & year <= 2010) %>% 
+  ggplot(aes(year, life_expectancy)) + geom_line()
+
+daydollars <- g %>% filter(continent == 'Africa' & year == 2010 & !is.na(gdp)) %>% mutate(dollars_per_day = gdp/population/365)
+daydollars
+
+daydollars %>% ggplot(aes(dollars_per_day)) + geom_density() + scale_x_continuous(trans = 'log2')
+x <- daydollars$dollars_per_day
+pnorm(1, mean(x), sd(x))
+pnorm(2, mean(x), sd(x)) - pnorm(0.5, mean(x), sd(x))
+mean(x <= 2) - mean(x <= 0.5)
+mean(x < 1)
+daydollars %>% ggplot(aes(sample = scale(dollars_per_day))) + geom_qq()
+
+daydollars <- g %>% filter(continent == 'Africa' & year%in% c(1970, 2010) & !is.na(gdp)) %>% mutate(dollars_per_day = gdp/population/365)
+daydollars %>% ggplot(aes(dollars_per_day, fill = year)) + geom_density() + scale_x_continuous(trans = 'log2') + facet_grid(year~.) + 
+  theme(legend.position = 'none')
+
+daydollars %>% ggplot(aes(dollars_per_day, fill = region)) + geom_density(alpha = 0.2, bw = 0.5, position = 'stack') + 
+  scale_x_continuous(trans = 'log2') + facet_grid(year~.) + theme(legend.position = 'none')
+
+gapminder_Africa_2010 <- g %>% filter(continent == 'Africa' & year == 2010 & !is.na(gdp)) %>% mutate(dollars_per_day = gdp/population/365)
+gapminder_Africa_2010  %>% ggplot(aes(dollars_per_day, infant_mortality, color = region)) + geom_point() + scale_x_continuous(trans = 'log2')
+gapminder_Africa_2010  %>% ggplot(aes(dollars_per_day, infant_mortality, color = region, label = country)) + geom_point() + 
+  scale_x_continuous(trans = 'log2') + geom_text() 
+gapminder_Africa_2010  %>% ggplot(aes(dollars_per_day, infant_mortality, color = region, label = country)) + geom_point() + 
+  scale_x_continuous(trans = 'log2') + ggrepel::geom_text_repel()
+
+gapminder_Africa_2010 <- g %>% filter(continent == 'Africa' & year %in% c(1970, 2010) & !is.na(gdp) & !is.na(infant_mortality)) %>% 
+  mutate(dollars_per_day = gdp/population/365)
+gapminder_Africa_2010  %>% ggplot(aes(dollars_per_day, infant_mortality, color = region, label = country)) + geom_point() + 
+  scale_x_continuous(trans = 'log2') + geom_text() + facet_grid(year~.)
+gapminder_Africa_2010  %>% ggplot(aes(dollars_per_day, infant_mortality, color = region, label = country)) + geom_point() + 
+  scale_x_continuous(trans = 'log2') + ggrepel::geom_text_repel() + facet_grid(year~.)
+                      
