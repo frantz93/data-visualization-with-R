@@ -25,3 +25,15 @@ params <- t %>%
   filter(!is.na(Age)) %>%
   summarize(mean = mean(Age), sd = sd(Age))
 t %>% filter(!is.na(Age)) %>% ggplot(aes(sample = Age)) + geom_qq(dparams = params) + geom_abline()
+
+#ploting survive and age distribution
+t %>% filter(!is.na(Survived) & !is.na(Sex)) %>% ggplot(aes(Survived, fill = Survived)) + geom_bar(stat = 'count')
+
+t %>% filter(!is.na(Survived) & !is.na(Sex)) %>% ggplot(aes(Survived, fill = Sex)) + geom_bar(stat = 'count', position = 'dodge2')
+
+t %>% filter(!is.na(Survived) & !is.na(Sex)) %>% ggplot(aes(Sex, fill = Survived)) + geom_bar(stat = 'count', position = 'dodge2')
+
+t %>% filter(!is.na(Survived) & !is.na(Sex)) %>% ggplot(aes(Survived, fill = Sex)) + geom_bar(stat = 'count', position = 'stack')
+t %>% filter(!is.na(Survived)) %>% summarise(mean = mean(Survived==1))
+typeof(t$Survived)
+mean(t$Survived==1)
